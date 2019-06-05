@@ -1,0 +1,135 @@
+converter/views.py
+
+def detail(request, question_id):
+    return HttpResponse("You're looking at question %s." % question_id)
+
+def results(request, question_id):
+    response = "You're looking at the results of question %s."
+    return HttpResponse(response % question_id)
+
+def vote(request, question_id):
+    return HttpResponse("You're voting on question %s." % question_id)
+
+converter/urls.py
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    # ex: /converter/
+    path('', views.index, name='index'),
+    # ex: /converter/5/
+    path('<int:question_id>/', views.detail, name='detail'),
+    # ex: /converter/5/results/
+    path('<int:question_id>/results/', views.results, name='results'),
+    # ex: /converter/5/vote/
+    path('<int:question_id>/vote/', views.vote, name='vote'),
+]
+
+converter/views.py
+from django.http import HttpResponse
+
+from .models import Question
+
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    output = ', '.join([q.question_text for q in latest_question_list])
+    return HttpResponse(output)
+
+# Leave the rest of the views (detail, results, vote) unchanged
+
+converter/templates/converter/index.html
+{% if latest_question_list %}
+    <ul>
+    {% for question in latest_question_list %}
+        <li><a href="/converter/{{ question.id }}/">{{ question.question_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No converter are available.</p>
+{% endif %}
+
+converter/views.py
+from django.http import HttpResponse
+from django.template import loader
+
+from .models import Question
+
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    template = loader.get_template('converter/index.html')
+    context = {
+        'latest_question_list': latest_question_list,
+    }
+    return HttpResponse(template.render(context, request))
+
+
+converter/views.py
+from django.shortcuts import render
+
+from .models import Question
+
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    context = {'latest_question_list': latest_question_list}
+    return render(request, 'converter/index.html', context)
+
+
+converter/views.py
+from django.http import Http404
+from django.shortcuts import render
+
+from .models import Question
+# ...
+def detail(request, question_id):
+    try:
+        question = Question.objects.get(pk=question_id)
+    except Question.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'converter/detail.html', {'question': question})
+
+
+converter/templates/converter/details.html
+{{ question }}
+
+converter/views.py
+from django.shortcuts import get_object_or_404, render
+
+from .models import Question
+# ...
+def detail(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    return render(request, 'converter/detail.html', {'question': question})
+
+
+converter/templates/converter/details.html
+<h1>{{ question.question_text }}</h1>
+<ul>
+{% for choice in question.choice_set.all %}
+    <li>{{ choice.choice_text }}</li>
+{% endfor %}
+</ul>
+
+
+converter/urls.py
+from django.urls import path
+
+from . import views
+
+app_name = 'converter'
+urlpatterns = [
+    path('', views.index, name='index'),
+    path('<int:question_id>/', views.detail, name='detail'),
+    path('<int:question_id>/results/', views.results, name='results'),
+    path('<int:question_id>/vote/', views.vote, name='vote'),
+]
+
+converter/templates/converter/index.html
+<li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li>
+
+converter/templates/converter/index.html
+<li><a href="{% url 'converter:detail' question.id %}">{{ question.question_text }}</a></li>
+

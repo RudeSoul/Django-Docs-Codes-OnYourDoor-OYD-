@@ -1,0 +1,85 @@
+...\> py -m django --version
+
+...\> django-admin startproject convertweb
+
+convertweb/
+    manage.py
+    convertweb/
+        __init__.py
+        settings.py
+        urls.py
+        wsgi.py
+
+
+...\> py manage.py runserver
+
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have unapplied migrations; your app may not work properly until they are applied.
+Run 'python manage.py migrate' to apply them.
+
+June 04, 2019 - 15:50:53
+Django version 2.2, using settings 'convertweb.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+...\> py manage.py runserver 8080
+
+...\> py manage.py runserver 0:8000
+
+...\> py manage.py startapp converter
+
+converter/
+    __init__.py
+    admin.py
+    apps.py
+    migrations/
+        __init__.py
+    models.py
+    tests.py
+    views.py
+
+converter/views.py
+from django.http import HttpResponse
+
+
+def index(request):
+    return HttpResponse("Hello, world. You're at the converter index.")
+
+
+converter/
+    __init__.py
+    admin.py
+    apps.py
+    migrations/
+        __init__.py
+    models.py
+    tests.py
+    urls.py
+    views.py
+
+
+converter/urls.py
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path('', views.index, name='index'),
+]
+
+
+convertweb/urls.py
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path('converter/', include('converter.urls')),
+    path('admin/', admin.site.urls),
+]
+
+
+...\> py manage.py runserver
+

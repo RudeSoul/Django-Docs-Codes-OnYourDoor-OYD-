@@ -1,0 +1,19 @@
+converter/static/converter/style.css
+li a {
+    color: green;
+}
+
+
+converter/templates/converter/index.html
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'converter/style.css' %}">
+
+
+$ python manage.py runserver
+
+converter/static/converter/style.css
+body {
+    background: white url("images/background.gif") no-repeat;
+}
+
